@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Reader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+<body>
+    <div class="main-container">
+        <div id="loading-spinner">
+            <div class="spinner"></div>
+            <div class="loading-text">Loading PDF...</div>
+        </div>
+
+        <div class="reader-container">
+            <div id="pdf-viewer"></div>
+        </div>
+
+        <div class="audio-controls">
+            <div class="progress-bar">
+                <div id="progress"></div>
+            </div>
+            <button class="control-btn">▶</button>
+            <div class="controls-middle">
+                <div class="voice-control">
+                    <select id="voiceSelect">
+                        <option value="">Loading voices...</option>
+                    </select>
+                </div>
+                <div class="speed-control">
+                    <select id="speedSelect">
+                        <option value="0.75">0.75x</option>
+                        <option value="1" selected>1x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                    </select>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        let currentPage = 1;
+        let pageTexts = [];
+        let totalPages = 0;
+        let pdf = null;
+        let isPlaying = false;
+        let speechUtterance = null;
+        let currentHighlight = null;
+        let currentVoice = null;
+        // Add these variables with the other global variables
+        let currentCharIndex = 0;
+        let lastSpeechText = '';
+
+        // Initialize voices
+        function setupVoices() {
+            const voiceSelect = document.getElementById('voiceSelect');
+            
+            function populateVoiceList() {
+                const voices = window.speechSynthesis.getVoices();
+                
+                // Only update if we have voices
+                if (voices.length > 0) {
+                    voiceSelect.innerHTML = ''; // Clear existing options
+                    
+                    // Add only English voices
+                    voices.forEach(voice => {
+                        if (voice.lang.includes('en')) {
+                            const option = document.createElement('option');
+                            option.value = voice.name;
+                            option.textContent = `${voice.name} (${voice.lang})`;
+                            voiceSelect.appendChild(option);
+                        }
+                    });
+                    
+                    // Set default voice
+                    if (!currentVoice && voices.length > 0) {
+                        currentVoice = voices[0];
+                        voiceSelect.value = voices[0].name;
+                    }
+                }
+            }
+
+            // Initial population
+            populateVoiceList();
+
+            // Chrome loads voices asynchronously
+            window.speechSynthesis.onvoiceschanged = function() {
+                populateVoiceList();
+            };
+        }
+
+        async function loadPDF() {
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const pdfViewer = document.getElementById('pdf-viewer');
+
+            try {
+                loadingSpinner.style.display = 'flex';
+                const url = "{{ url_for('serve_file', filename=filename) }}";
+                console.log('Loading PDF from:', url);
+
+                const loadingTask = pdfjsLib.getDocument(url);
+                loadingTask.onProgress = function(progress) {
+                    const percent = (progress.loaded / progress.total) * 100;
+                    document.querySelector('.loading-text').textContent = 
+                        `Loading PDF... ${Math.round(percent)}%`;
+                };
+
+                pdf = await loadingTask.promise;
+                console.log('PDF loaded successfully. Total pages:', pdf.numPages);
+                totalPages = pdf.numPages;
+
+                // Clear viewer
+                pdfViewer.innerHTML = '';
+
+                // Load pages one by one
+                for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                    document.querySelector('.loading-text').textContent = 
+                        `Loading page ${pageNum} of ${totalPages}`;
+                    await renderPage(pageNum);
+                }
+
+                setupControls();
+                loadingSpinner.style.display = 'none';
+
+            } catch (error) {
+                console.error('PDF loading error:', error);
+                pdfViewer.innerHTML = `
+                    <div class="error-message">
+                        Error loading PDF: ${error.message}<br>
+                        Please try refreshing the page.
+                    </div>`;
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        async function renderPage(pageNum) {
+    try {
+        const page = await pdf.getPage(pageNum);
+        const scale = 1.5;
+        const viewport = page.getViewport({ scale });
+
+        const pageContainer = document.createElement('div');
+        pageContainer.className = 'pdf-page';
+        pageContainer.id = `page-${pageNum}`;
+
+        const textContent = await page.getTextContent();
+        const textLayer = document.createElement('div');
+        textLayer.className = 'text-layer';
+
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        pageTexts[pageNum] = pageText;
+
+        textContent.items.forEach((item, index) => {
+            const span = document.createElement('span');
+            span.textContent = item.str + ' ';
+            span.dataset.index = index;
+            textLayer.appendChild(span);
+        });
+
+        // Add page number as a separate element with a fixed number
+        const pageNumberDiv = document.createElement('div');
+        pageNumberDiv.className = 'page-number';
+        pageNumberDiv.setAttribute('data-pagenumber', pageNum); // Store the page number as a data attribute
+        pageNumberDiv.innerHTML = `Page ${pageNum}`; // Set the fixed page number
+        
+        pageContainer.appendChild(textLayer);
+        pageContainer.appendChild(pageNumberDiv);
+        document.getElementById('pdf-viewer').appendChild(pageContainer);
+
+    } catch (error) {
+        console.error(`Error rendering page ${pageNum}:`, error);
+        throw error;
+    }
+}
+
+
+
+
+        function setupControls() {
+            const playButton = document.querySelector('.control-btn');
+            const speedSelect = document.getElementById('speedSelect');
+            const voiceSelect = document.getElementById('voiceSelect');
+            const progressBar = document.querySelector('.progress-bar');
+
+            playButton.addEventListener('click', togglePlayPause);
+
+            speedSelect.addEventListener('change', () => {
+                if (isPlaying) {
+                    pauseReading();
+                    startReading();
+                }
+            });
+
+            voiceSelect.addEventListener('change', () => {
+                if (isPlaying) {
+                    pauseReading();
+                    startReading();
+                }
+            });
+
+            progressBar.addEventListener('click', handleProgressBarClick);
+        }
+
+        function togglePlayPause() {
+    if (!isPlaying) {
+        startReading(currentCharIndex); // Resume from last position
+    } else {
+        pauseReading();
+    }
+}
+
+
+        function startReading(startFromIndex = 0) {
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) {
+        alert('No text-to-speech voices available. Please check your browser settings.');
+        return;
+    }
+
+    if (!isPlaying && pageTexts[currentPage]) {
+        isPlaying = true;
+        document.querySelector('.control-btn').innerHTML = '⏸';
+
+        // Cancel any existing speech
+        window.speechSynthesis.cancel();
+
+        const text = pageTexts[currentPage];
+        lastSpeechText = text; // Store the text for resuming later
+        
+        // If starting from middle, get substring
+        const speakText = startFromIndex > 0 ? text.substring(startFromIndex) : text;
+        speechUtterance = new SpeechSynthesisUtterance(speakText);
+
+        // Set voice
+        const selectedVoiceName = document.getElementById('voiceSelect').value;
+        if (selectedVoiceName) {
+            const voices = window.speechSynthesis.getVoices();
+            const selectedVoice = voices.find(voice => voice.name === selectedVoiceName);
+            if (selectedVoice) {
+                speechUtterance.voice = selectedVoice;
+            }
+        }
+
+        // Set speed
+        speechUtterance.rate = parseFloat(document.getElementById('speedSelect').value);
+
+        // Handle word boundaries for highlighting
+        speechUtterance.addEventListener('boundary', function(event) {
+            if (event.name === 'word') {
+                currentCharIndex = startFromIndex + event.charIndex; // Track global position
+                
+                // Remove previous highlight
+                if (currentHighlight) {
+                    currentHighlight.classList.remove('highlighted-text');
+                }
+
+                // Find and highlight current word
+                const textLayer = document.querySelector(`#page-${currentPage} .text-layer`);
+                if (textLayer) {
+                    let charCount = 0;
+                    const spans = textLayer.querySelectorAll('span');
+                    
+                    for (let span of spans) {
+                        const spanLength = span.textContent.length;
+                        if (charCount <= currentCharIndex && currentCharIndex < charCount + spanLength) {
+                            span.classList.add('highlighted-text');
+                            currentHighlight = span;
+                            
+                            // Scroll into view
+                            span.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
+                            break;
+                        }
+                        charCount += spanLength;
+                    }
+                }
+
+                // Update progress
+                updateProgress((currentCharIndex / text.length) * 100);
+            }
+        });
+
+        // Handle end of speech
+        speechUtterance.addEventListener('end', () => {
+            if (currentHighlight) {
+                currentHighlight.classList.remove('highlighted-text');
+            }
+            if (currentPage < totalPages) {
+                currentPage++;
+                currentCharIndex = 0;
+                startReading();
+            } else {
+                isPlaying = false;
+                currentCharIndex = 0;
+                document.querySelector('.control-btn').innerHTML = '▶';
+            }
+        });
+
+        // Start speaking
+        window.speechSynthesis.speak(speechUtterance);
+    }
+}
+
+
+function pauseReading() {
+    if (isPlaying) {
+        window.speechSynthesis.cancel();
+        isPlaying = false;
+        document.querySelector('.control-btn').innerHTML = '▶';
+        if (currentHighlight) {
+            currentHighlight.classList.remove('highlighted-text');
+        }
+        // Don't reset currentCharIndex here to allow resuming
+    }
+}
+
+
+function handleProgressBarClick(e) {
+    if (!pageTexts[currentPage]) return;
+
+    const progressBar = e.currentTarget;
+    const clickPosition = (e.clientX - progressBar.getBoundingClientRect().left) / progressBar.offsetWidth;
+    const newCharIndex = Math.floor(clickPosition * pageTexts[currentPage].length);
+    
+    currentCharIndex = newCharIndex; // Update the current position
+    
+    if (isPlaying) {
+        pauseReading();
+    }
+    updateProgress(clickPosition * 100);
+    startReading(newCharIndex);
+}
+
+
+        function updateProgress(percentage) {
+            document.querySelector('#progress').style.width = `${percentage}%`;
+        }
+
+       // Initialize when page loads
+window.onload = function() {
+    loadPDF();
+    setupVoices();
+    
+    // Initialize progress bar at 0
+    document.querySelector('#progress').style.width = '0%';
+    
+    // Some browsers need a slight delay
+    setTimeout(setupVoices, 100);
+};
+
+    </script>
+</body>
+</html>
