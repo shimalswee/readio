@@ -3,6 +3,11 @@ import os
 from werkzeug.utils import secure_filename
 import PyPDF2
 import pdfplumber  # Install this: pip install pdfplumber
+import sys
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 
@@ -59,9 +64,31 @@ def upload_file():
 def read_book(filename):
     return render_template('reader.html', filename=filename)
 
-@app.route('/uploads/<filename>')
-def serve_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, mimetype='application/pdf')
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return redirect(request.url)
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return redirect(request.url)
+        
+    if file and allowed_file(file.filename):
+        try:
+            filename = secure_filename(file.filename)
+            # Create uploads directory if it doesn't exist
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+            
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            
+            # Extract text from PDF and store it
+            text_content = extract_text_from_pdf(file_path)
+            return redirect(url_for('read_book', filename=filename))
+        except Exception as e:
+            print(f"Upload error: {e}")
+            return "Error uploading file", 500
 
 # New route to get PDF text content
 @app.route('/get_text/<filename>')
