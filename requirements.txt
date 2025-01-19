@@ -1,2 +1,5 @@
 flask
-
+gunicorn
+PyPDF2
+pdfplumber
+Werkzeug
