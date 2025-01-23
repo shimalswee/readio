@@ -37,31 +37,24 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        print("No file part")
         return redirect(request.url)
     
     file = request.files['file']
     
     if file.filename == '':
-        print("No selected file")
         return redirect(request.url)
     
     if file and allowed_file(file.filename):
-        try:
-            filename = secure_filename(file.filename)
-            blob = bucket.blob(filename)
-            blob.upload_from_string(
-                file.read(),
-                content_type=file.content_type
-            )
-            # Make the blob public and get the public URL
-            blob.make_public()
-            public_url = blob.public_url
-            print(f"File uploaded successfully. URL: {public_url}")
-            return redirect(url_for('read_book', filename=filename))
-        except Exception as e:
-            print(f"Upload error: {str(e)}")
-            return f"Error uploading file: {str(e)}", 500
+        filename = secure_filename(file.filename)
+        blob = bucket.blob(filename)
+        blob.upload_from_string(
+            file.read(),
+            content_type=file.content_type
+        )
+        # Remove blob.make_public() since we're using uniform access
+        return redirect(url_for('read_book', filename=filename))
+
+
 
 
 @app.route('/read/<filename>')
