@@ -12,7 +12,7 @@ ALLOWED_EXTENSIONS = {'pdf', 'epub'}
 MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB limit
 
 # GCS Configuration
-BUCKET_NAME = "your-bucket-name"  # Replace with your actual bucket name
+BUCKET_NAME = "readio-storage"  # Replace with your actual bucket name
 credentials_json = os.getenv('GOOGLE_CREDENTIALS')
 
 if credentials_json:
