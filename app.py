@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, make_response
 import os
 import json
 from werkzeug.utils import secure_filename
@@ -31,19 +31,13 @@ def allowed_file(filename):
 def index():
     return render_template('index.html')
 
-
-
-
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         return redirect(request.url)
-    
     file = request.files['file']
-    
     if file.filename == '':
         return redirect(request.url)
-    
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         blob = bucket.blob(filename)
@@ -53,9 +47,6 @@ def upload_file():
         )
         # Remove blob.make_public() since we're using uniform access
         return redirect(url_for('read_book', filename=filename))
-
-
-
 
 @app.route('/read/<filename>')
 def read_book(filename):
@@ -71,8 +62,7 @@ def get_pdf(filename):
         return response
     except Exception as e:
         print(f"Error accessing file: {e}")
-        return "Error accessing file", 500
-
+        return f"Error accessing file: {str(e)}", 500
 
 @app.route('/uploads/<filename>')
 def serve_file(filename):
@@ -82,10 +72,7 @@ def serve_file(filename):
         return redirect(url)
     except Exception as e:
         print(f"Error serving file: {e}")
-        return "Error serving file", 500
-
-# Required for Vercel
-app = app
+        return f"Error serving file: {str(e)}", 500
 
 if __name__ == '__main__':
     app.run(debug=True)
