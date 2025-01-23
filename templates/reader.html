@@ -103,7 +103,7 @@
             try {
                 loadingSpinner.style.display = 'flex';
                 //const url = "{{ url_for('serve_file', filename=filename) }}";
-                const url = "{{ file_url }}";
+                const url = "{{ url_for('get_pdf', filename=filename) }}";
                 
                 console.log('Loading PDF from:', url);
 

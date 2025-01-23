@@ -59,13 +59,20 @@ def upload_file():
 
 @app.route('/read/<filename>')
 def read_book(filename):
+    return render_template('reader.html', filename=filename)
+
+@app.route('/get-pdf/<filename>')
+def get_pdf(filename):
     try:
         blob = bucket.blob(filename)
-        url = blob.public_url
-        return render_template('reader.html', filename=filename, file_url=url)
+        pdf_content = blob.download_as_bytes()
+        response = make_response(pdf_content)
+        response.headers['Content-Type'] = 'application/pdf'
+        return response
     except Exception as e:
         print(f"Error accessing file: {e}")
         return "Error accessing file", 500
+
 
 @app.route('/uploads/<filename>')
 def serve_file(filename):
