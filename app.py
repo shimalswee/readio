@@ -31,14 +31,19 @@ def allowed_file(filename):
 def index():
     return render_template('index.html')
 
+
+
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
+        print("No file part")
         return redirect(request.url)
     
     file = request.files['file']
     
     if file.filename == '':
+        print("No selected file")
         return redirect(request.url)
     
     if file and allowed_file(file.filename):
@@ -49,10 +54,15 @@ def upload_file():
                 file.read(),
                 content_type=file.content_type
             )
+            # Make the blob public and get the public URL
+            blob.make_public()
+            public_url = blob.public_url
+            print(f"File uploaded successfully. URL: {public_url}")
             return redirect(url_for('read_book', filename=filename))
         except Exception as e:
-            print(f"Upload error: {e}")
-            return "Error uploading file", 500
+            print(f"Upload error: {str(e)}")
+            return f"Error uploading file: {str(e)}", 500
+
 
 @app.route('/read/<filename>')
 def read_book(filename):
