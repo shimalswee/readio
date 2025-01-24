@@ -240,121 +240,68 @@ button:hover {
 }
 
 /* For mobile screens */
-@media (max-width: 768px) {
+@media only screen and (max-width: 768px) {
     .logo img {
         max-width: 400px;  /* Smaller logo for mobile */
     }
     .container {
-        width: 100%;
-        margin: 0;
-        padding: 15px;
-        border-radius: 0; /* Remove border radius for full-width look */
-        box-shadow: none;
+        margin: 15px 10px;
+        padding: 10px;
     }
-
     .upload-area {
-        padding: 60px 20px;
-        margin: 10px 0;
-        border: 3px dashed #ccc; /* Make border more visible */
+        padding: 40px 20px;
     }
-
-    .file-info {
-        font-size: 18px; /* Larger text */
+    .audio-controls {
+        padding: 15px 20px;
     }
-
-    h1 {
-        font-size: 28px;
-        padding: 15px 0;
+    
+    .controls-middle {
+        gap: 16px;
+        flex-wrap: wrap;
     }
-
-    .sub {
+    
+    .control-btn {
+        width: 48px;
+        height: 48px;
         font-size: 24px;
     }
-
-    button {
-        width: 100%; /* Full width buttons */
-        padding: 15px 20px;
-        font-size: 22px;
-        margin: 10px 0;
-    }
-
-    /* Reader container adjustments */
-    .reader-container {
-        padding: 10px 0 150px; /* Increased bottom padding for controls */
-        width: 100%;
-    }
-
-    #pdf-viewer {
-        font-size: 20px;
-        padding: 0;
-        width: 100%;
-    }
-
-    .pdf-page {
-        margin: 0 0 15px 0;
-        padding: 15px;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    /* Audio controls adjustments */
-    .audio-controls {
-        padding: 25px 15px;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .control-btn {
-        width: 70px;
-        height: 70px;
-        font-size: 32px;
-    }
-
-    .controls-middle {
-        flex-direction: column;
-        gap: 15px;
-        margin-top: 20px;
-    }
-
+    
     #voiceSelect, #speedSelect {
-        width: 100%;
-        max-width: none;
-        min-width: none;
-        padding: 15px;
+        padding: 8px 16px;
+        min-width: 120px;
+        font-size: 13px;
+    }
+    #pdf-viewer {
         font-size: 18px;
-        margin: 5px 0;
     }
-
-    /* Progress bar improvements */
-    .progress-bar {
-        height: 8px;
-        margin: 25px 0;
-    }
-
-    #progress::after {
-        width: 24px;
-        height: 24px;
-        right: -12px;
-    }
-
-    .time-indicator {
+    
+    .file-info {
         font-size: 14px;
-        top: -25px;
     }
-
-    /* Page number adjustments */
-    .page-number {
-        font-size: 16px;
-        padding: 8px 15px;
-        bottom: 15px;
-        right: 15px;
+    
+    button {
+        font-size: 20px;
+        padding: 8px 16px;
     }
-
-    /* Logo adjustments */
-    .logo {
-        padding: 15px 0;
+    .progress-bar {
+        margin: 15px 0px;
+    }
+    
+    #progress::after {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .time-indicator {
+        font-size: 10px;
+        top: -16px;
+    }
+    .reader-container {
+        padding: 10px 0 100px;
+    }
+    
+    .main-container {
+        height: calc(100vh - 20px);
     }
 
 }
