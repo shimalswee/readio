@@ -263,22 +263,6 @@ button:hover {
             padding: 0 10px;
         }
     
-        #voiceSelect, #speedSelect {
-            flex: 1; /* This allows the buttons to grow */
-            min-width: 130px; /* Minimum width to ensure text readability */
-            padding: 12px 15px; /* Increased padding */
-            font-size: 16px;
-            margin: 5px 0;
-            white-space: nowrap; /* Prevents text from wrapping */
-            overflow: hidden;
-            text-overflow: ellipsis; /* Shows ... if text is too long */
-            width: auto; /* Remove fixed width */
-        }
-    
-        /* If you need one select to be slightly smaller than the other */
-        #speedSelect {
-            min-width: 100px; /* Slightly smaller min-width for speed select */
-        }
     
     
     
