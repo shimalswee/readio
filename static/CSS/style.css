@@ -254,16 +254,17 @@ button:hover {
     .audio-controls {
         padding: 15px 20px;
     }
-        .controls-middle {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            gap: 10px;
-            margin-top: 20px;
-            padding: 0 10px;
+    .controls-middle {
+        display: flex;
+        flex-direction: row;  /* side by side */
+        justify-content: space-between;  /* This is key for proper spacing */
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+        #voiceSelect, #speedSelect {
+            width: 45%;  /* This ensures they take equal space */
         }
-    
-    
     
     
     .control-btn {
