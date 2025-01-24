@@ -254,23 +254,21 @@ button:hover {
     .audio-controls {
         padding: 15px 20px;
     }
+            .controls-middle {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
     
-    .controls-middle {
-        display: flex;
-        flex-direction: row; /* Change from column to row */
-        justify-content: space-between; /* Space out the controls */
-        gap: 10px; /* Reduce gap between items */
-        margin-top: 20px;
-        padding: 0 10px; /* Add some padding on sides */
-    }
-
-    #voiceSelect, #speedSelect {
-        width: 48%; /* Make each select take up roughly half the space */
-        min-width: 0; /* Remove min-width constraint */
-        padding: 12px 10px; /* Adjust padding to fit better */
-        font-size: 16px;
-        margin: 5px 0;
-    }
+        #voiceSelect, #speedSelect {
+            width: auto; /* Just let it take natural width */
+            min-width: auto; /* Remove min-width restriction */
+            padding: 12px 15px;
+            font-size: 16px;
+        }
+    
     
     .control-btn {
         width: 48px;
