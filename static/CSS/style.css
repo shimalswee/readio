@@ -243,4 +243,64 @@ button:hover {
     .logo img {
         max-width: 150px;  /* Smaller logo for mobile */
     }
+    .container {
+        margin: 15px 10px;
+        padding: 10px;
+    }
+    upload-area {
+        padding: 40px 20px;
+    }
+    .audio-controls {
+        padding: 15px 20px;
+    }
+    
+    .controls-middle {
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    
+    .control-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+    }
+    
+    #voiceSelect, #speedSelect {
+        padding: 8px 16px;
+        min-width: 120px;
+        font-size: 13px;
+    }
+    #pdf-viewer {
+        font-size: 18px;
+    }
+    
+    .file-info {
+        font-size: 14px;
+    }
+    
+    button {
+        font-size: 20px;
+        padding: 8px 16px;
+    }
+    .progress-bar {
+        margin: 15px 0px;
+    }
+    
+    #progress::after {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .time-indicator {
+        font-size: 10px;
+        top: -16px;
+    }
+    .reader-container {
+        padding: 10px 0 100px;
+    }
+    
+    .main-container {
+        height: calc(100vh - 20px);
+    }
+
 }
