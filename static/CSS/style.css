@@ -256,8 +256,20 @@ button:hover {
     }
     
     .controls-middle {
-        gap: 16px;
-        flex-wrap: wrap;
+        display: flex;
+        flex-direction: row; /* Change from column to row */
+        justify-content: space-between; /* Space out the controls */
+        gap: 10px; /* Reduce gap between items */
+        margin-top: 20px;
+        padding: 0 10px; /* Add some padding on sides */
+    }
+
+    #voiceSelect, #speedSelect {
+        width: 48%; /* Make each select take up roughly half the space */
+        min-width: 0; /* Remove min-width constraint */
+        padding: 12px 10px; /* Adjust padding to fit better */
+        font-size: 16px;
+        margin: 5px 0;
     }
     
     .control-btn {
@@ -266,11 +278,6 @@ button:hover {
         font-size: 24px;
     }
     
-    #voiceSelect, #speedSelect {
-        padding: 8px 16px;
-        min-width: 120px;
-        font-size: 13px;
-    }
     #pdf-viewer {
         font-size: 18px;
     }
@@ -300,8 +307,5 @@ button:hover {
         padding: 10px 0 100px;
     }
     
-    .main-container {
-        height: calc(100vh - 20px);
-    }
 
 }
