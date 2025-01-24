@@ -242,7 +242,7 @@ button:hover {
 /* For mobile screens */
 @media only screen and (max-width: 768px) {
     .logo img {
-        max-width: 400px;  /* Smaller logo for mobile */
+        max-width: 200px;  /* Smaller logo for mobile */
     }
     .container {
         margin: 15px 10px;
